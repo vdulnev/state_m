@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 
 class Counter extends StatefulWidget {
+
+  final CounterController controller;
+
+  Counter(this.controller);
+
   @override
-  _CounterState createState() => _CounterState();
+  _CounterState createState() => _CounterState(controller);
 }
 
 class _CounterState extends State<Counter> {
 
+  final CounterController controller;
   int _counter = 0;
+
+  _CounterState(this.controller){
+    if (controller != null) {
+      controller.counterState = this;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,5 +49,20 @@ class _CounterState extends State<Counter> {
         ),
       ],
     );
+  }
+
+  void inc() {
+    setState(() {
+      _counter++;});
+  }
+}
+
+class CounterController {
+  _CounterState counterState;
+
+  void inc() {
+    if (counterState != null) {
+      counterState.inc();
+    }
   }
 }
