@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class Counter extends StatefulWidget {
-
   final CounterController controller;
 
   Counter(this.controller);
@@ -11,11 +10,10 @@ class Counter extends StatefulWidget {
 }
 
 class _CounterState extends State<Counter> {
-
   final CounterController controller;
   int _counter = 0;
 
-  _CounterState(this.controller){
+  _CounterState(this.controller) {
     if (controller != null) {
       controller.counterState = this;
     }
@@ -51,18 +49,21 @@ class _CounterState extends State<Counter> {
     );
   }
 
-  void inc() {
-    setState(() {
-      _counter++;});
+  int inc() {
+    _counter++;
+    setState(() {});
+    return _counter;
   }
 }
 
 class CounterController {
   _CounterState counterState;
 
-  void inc() {
-    if (counterState != null) {
-      counterState.inc();
-    }
+  int inc() {
+    return counterState.inc();
+  }
+
+  int value() {
+    return counterState._counter;
   }
 }
