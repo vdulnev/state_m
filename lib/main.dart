@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'Counter.dart';
@@ -48,6 +50,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   int _counter = 0;
+  StreamController<int> inputController = StreamController();
+  StreamController<int> outputStreamController = StreamController();
 
   void _incrementCounter() {
     setState(() {
@@ -56,7 +60,16 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
+      inputController.sink.add(1);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    outputStreamController.stream.listen((value) { setState(() {
+      _counter = value;
+    }); });
   }
 
   @override
@@ -76,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Counter(),
+        child: Counter(inputController.stream, outputStreamController.sink),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -85,4 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  @override
+  void dispose() {
+    inputController.close();
+    outputStreamController.close();
+    super.dispose();
+  }
+
+
 }

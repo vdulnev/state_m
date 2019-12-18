@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 
 class Counter extends StatefulWidget {
+  final Stream<int> stream;
+  final Sink<int> sink;
+
+  const Counter(this.stream, this.sink, {Key key}) : super(key: key);
+
   @override
-  _CounterState createState() => _CounterState();
+  _CounterState createState() => _CounterState(stream, sink);
 }
 
 class _CounterState extends State<Counter> {
 
   int _counter = 0;
+  final Stream<int> _stream;
+  final Sink<int> sink;
+
+  _CounterState(this._stream, this.sink) {
+    if (_stream != null) {
+      _stream.listen((value) {
+        _counter = _counter + value;
+        if (sink != null) {
+          sink.add(_counter);
+        }
+        setState(() {});
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
