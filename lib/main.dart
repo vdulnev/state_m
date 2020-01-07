@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'Counter.dart';
 
@@ -24,87 +25,64 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BlocProvider<MyHomePageBloc>(
+        create: (context) => MyHomePageBloc(),
+        child: MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class MyHomePageEvent {}
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+class MyHomePageState {}
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class MyHomePageBloc extends Bloc<MyHomePageEvent, MyHomePageState> {
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState get initialState => MyHomePageState();
+
+  @override
+  Stream<MyHomePageState> mapEventToState(MyHomePageEvent event) async* {
+    yield MyHomePageState();
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePage extends StatelessWidget {
 
-  int _counter = 0;
-  StreamController<int> inputController = StreamController();
-  StreamController<int> outputStreamController = StreamController();
+  MyHomePage({Key key, this.title}) : super(key: key);
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      inputController.sink.add(1);
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    outputStreamController.stream.listen((value) { setState(() {
-      _counter = value;
-    }); });
-  }
+  final String title;
+  final CounterBloc counterBloc = CounterBloc();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title + ' $_counter'),
+
+    final MyHomePageBloc myHomePageBloc = BlocProvider.of<MyHomePageBloc>(context);
+
+    return BlocBuilder<MyHomePageBloc, MyHomePageState>(
+      builder: (context, state) => Scaffold(
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(title + ' ${counterBloc.state}'),
+        ),
+        body: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child:  Counter(bloc: counterBloc),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _incButtonClicked(myHomePageBloc),
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ), // This trailing comma makes auto-formatting nicer for build methods.
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Counter(inputController.stream, outputStreamController.sink),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  @override
-  void dispose() {
-    inputController.close();
-    outputStreamController.close();
-    super.dispose();
+  _incButtonClicked(MyHomePageBloc myHomePageBloc) {
+    counterBloc.add(CounterEvent.increment);
+    myHomePageBloc.add(MyHomePageEvent());
   }
-
-
 }
